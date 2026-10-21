@@ -178,6 +178,30 @@ def test_model_different_name():
     assert MyModel.model_fields['a'].description == 'A docs'
 
 
+def test_model_docs_nested_class():
+    class Outer(BaseModel):
+        model_config = ConfigDict(use_attribute_docstrings=True)
+
+        a: int
+        """Outer A docs"""
+
+        b: int
+
+        class Inner(BaseModel):
+            model_config = ConfigDict(use_attribute_docstrings=True)
+
+            a: str
+            """Inner A docs"""
+
+            b: str
+            """Inner B docs"""
+
+    assert Outer.model_fields['a'].description == 'Outer A docs'
+    assert Outer.model_fields['b'].description is None
+    assert Outer.Inner.model_fields['a'].description == 'Inner A docs'
+    assert Outer.Inner.model_fields['b'].description == 'Inner B docs'
+
+
 def test_model_generic():
     class MyModel(BaseModel, Generic[T]):
         a: T

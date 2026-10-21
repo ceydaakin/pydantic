@@ -16,11 +16,18 @@ class DocstringVisitor(ast.NodeVisitor):
         self.target: str | None = None
         self.attrs: dict[str, str] = {}
         self.previous_node_type: type[ast.AST] | None = None
+        self.in_class = False
 
     def visit(self, node: ast.AST) -> Any:
         node_result = super().visit(node)
         self.previous_node_type = type(node)
         return node_result
+
+    def visit_ClassDef(self, node: ast.ClassDef) -> Any:
+        # Only the outermost class is inspected, nested classes have their own attribute docstrings:
+        if not self.in_class:
+            self.in_class = True
+            self.generic_visit(node)
 
     def visit_AnnAssign(self, node: ast.AnnAssign) -> Any:
         if isinstance(node.target, ast.Name):
