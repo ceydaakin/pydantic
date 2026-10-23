@@ -1098,6 +1098,8 @@ class GenerateSchema:
     def _generate_schema_inner(self, obj: Any, origin: Any | None = PydanticUndefined) -> core_schema.CoreSchema:
         if typing_objects.is_self(obj):
             obj = self._resolve_self_type(obj)
+            # The resolved type can be a parametrized generic (e.g. `Node[int]`), so the origin must be recomputed:
+            origin = get_origin(obj)
 
         origin = origin if origin is not PydanticUndefined else get_origin(obj)
 

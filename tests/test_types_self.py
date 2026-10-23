@@ -173,6 +173,20 @@ def test_self_type_in_dataclass(Self):
         m.item.ref.x = 3
 
 
+def test_self_type_in_parametrized_generic_dataclass(Self):
+    """https://github.com/pydantic/pydantic/issues/14064"""
+
+    T = typing.TypeVar('T')
+
+    @dataclasses.dataclass
+    class Node(typing.Generic[T]):
+        value: T
+        parent: Self | None = None
+
+    ta = TypeAdapter(Node[int])
+    assert ta.validate_python({'value': '1', 'parent': {'value': 0}}) == Node(value=1, parent=Node(value=0))
+
+
 def test_invalid_validate_call(Self):
     with pytest.raises(PydanticUserError, match='`typing.Self` is invalid in this context'):
 
